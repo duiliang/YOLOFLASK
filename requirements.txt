@@ -1,0 +1,12 @@
+flask==2.2.3
+flask-socketio==5.3.3
+bootstrap-flask==2.2.0
+onnxruntime==1.14.1
+opencv-python==4.7.0.72
+numpy==1.24.2
+Pillow==9.5.0
+python-engineio==4.3.4
+python-socketio==5.7.2
+eventlet==0.33.3
+pyinstaller==5.9.0
+werkzeug==2.2.3

@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}YOLO目标检测系统 - 首页{% endblock %}
+
+{% block page_title %}YOLO目标检测{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>目标检测</h5>
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modelManagerModal">
+                    <i class="bi bi-diagram-3"></i> 管理模型
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="mb-3" id="modelLoadedInfo">
+                    <div class="alert alert-info">
+                        <strong>当前模型:</strong> <span id="currentModelInfo">未加载模型</span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">图像来源</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="imageSource" id="uploadImage" value="upload" checked>
+                        <label class="form-check-label" for="uploadImage">
+                            上传图像
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="imageSource" id="webcamImage" value="webcam">
+                        <label class="form-check-label" for="webcamImage">
+                            摄像头采集
+                        </label>
+                    </div>
+                </div>
+
+                <div id="uploadImageSection" class="mb-3">
+                    <label for="imageUpload" class="form-label">选择图像</label>
+                    <input class="form-control" type="file" id="imageUpload" accept=".jpg,.jpeg,.png">
+                </div>
+
+                <div id="webcamSection" class="mb-3" style="display: none;">
+                    <div class="text-center">
+                        <video id="webcam" width="100%" height="auto" autoplay playsinline></video>
+                        <button id="captureBtn" class="btn btn-primary mt-2">捕获图像</button>
+                        <button id="startStopBtn" class="btn btn-secondary mt-2">停止</button>
+                    </div>
+                </div>
+
+                <div class="text-center mt-3">
+                    <button id="detectBtn" class="btn btn-success">执行检测</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>检测状态</h5>
+            </div>
+            <div class="card-body">
+                <div id="statusMessages" class="alert alert-info">
+                    等待操作...
+                </div>
+                <div id="detectionResults" style="display: none;">
+                    <h6>检测结果:</h6>
+                    <ul id="resultsList" class="list-group"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>检测结果图像</h5>
+            </div>
+            <div class="card-body text-center">
+                <div id="resultImageContainer" style="max-height: 500px; overflow: auto;">
+                    <img id="resultImage" class="img-fluid" src="" style="display: none; max-width: 100%;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/model-manager.js') }}"></script>
+<script src="{{ url_for('static', filename='js/detection.js') }}"></script>
+{% endblock %}

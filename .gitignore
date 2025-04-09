@@ -1,0 +1,69 @@
+# Python字节码文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 虚拟环境
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# 依赖管理
+pip-log.txt
+pip-delete-this-directory.txt
+
+# 编辑器/IDE配置
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 日志文件
+*.log
+logs/
+log/
+
+# 项目特定忽略项
+# 上传的图片和检测结果
+static/uploads/*
+static/results/*
+!static/uploads/.gitkeep
+!static/results/.gitkeep
+
+# 模型文件(通常很大)
+models/*
+!models/.gitkeep
+*.onnx
+*.pt
+*.pth
+*.weights
+
+# 缓存和临时文件
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# 实例配置(可能包含敏感信息)
+instance/
+
+# 分发/打包
+dist/
+build/
+*.egg-info/
+
+# Jupyter Notebook
+.ipynb_checkpoints

@@ -1,0 +1,104 @@
+/* 基础样式设置 */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+.footer {
+    margin-top: 2rem;
+}
+
+/* 卡片样式 */
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.card-header {
+    font-weight: bold;
+    padding: 0.75rem 1.25rem;
+}
+
+/* 按钮样式 */
+.btn {
+    font-weight: 500;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+/* 表单元素样式 */
+.form-control {
+    border-radius: 4px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* 检测结果列表样式 */
+#resultsList {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+/* 状态消息区域 */
+#statusMessages {
+    min-height: 60px;
+}
+
+/* 图像容器样式 */
+#resultImageContainer {
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 15px;
+    background-color: #f8f9fa;
+}
+
+/* 模型信息样式 */
+#modelLoadedInfo {
+    transition: all 0.3s ease;
+}
+
+/* 摄像头视频容器 */
+#webcam {
+    max-width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+}

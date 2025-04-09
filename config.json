@@ -1,0 +1,30 @@
+{
+    "server": {
+        "host": "0.0.0.0",
+        "port": 5000,
+        "debug": true
+    },
+    "model": {
+        "default_path": "",
+        "default_type": "yolov8",
+        "conf_threshold": 0.25,
+        "iou_threshold": 0.45,
+        "current_model": "QR Code Detector"
+    },
+    "models": [
+        {
+            "name": "QR Code Detector",
+            "path": "D:\\work\\SmartCamera\\smart-camera-publish_real\\smart-camera-pc-publis\\projects\\qrcode\\qqrcode.onnx",
+            "type": "yolov8",
+            "description": "yolo V8 薛博版 训练模型"
+        }
+    ],
+    "upload": {
+        "max_size_mb": 16,
+        "allowed_extensions": [
+            "jpg",
+            "jpeg",
+            "png"
+        ]
+    }
+}
