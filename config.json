@@ -9,7 +9,7 @@
         "default_type": "yolov8",
         "conf_threshold": 0.25,
         "iou_threshold": 0.45,
-        "current_model": "QR Code Detector"
+        "current_model": "QR Code Detector2"
     },
     "models": [
         {
@@ -17,6 +17,12 @@
             "path": "D:\\work\\SmartCamera\\smart-camera-publish_real\\smart-camera-pc-publis\\projects\\qrcode\\qqrcode.onnx",
             "type": "yolov8",
             "description": "yolo V8 薛博版 训练模型"
+        },
+        {
+            "name": "QR Code Detector2",
+            "path": "D:\\work\\SmartCamera\\smart-camera-publish_real\\smart-camera-pc-publis\\projects\\qrcode\\qqrcode.onnx",
+            "type": "yolov8",
+            "description": "测试"
         }
     ],
     "upload": {

@@ -35,6 +35,12 @@ def index():
     return render_template('index.html')
 
 
+@bp.route('/model-management')
+def model_management():
+    """模型管理页面路由"""
+    return render_template('model-management.html')
+
+
 @bp.route('/config.json')
 def get_config():
     """获取配置文件内容"""
@@ -71,8 +77,57 @@ def add_model():
     model_type = data.get('type')
     description = data.get('description', '')
     
-    if not name or not path or not model_type:
-        return jsonify({'error': '模型名称、路径和类型为必填项'}), 400
+    if not name or not path:
+        return jsonify({'error': '模型名称和路径为必填项'}), 400
+    
+    # 检查模型文件是否存在
+    model_file_path = path
+    if not os.path.isabs(model_file_path):
+        model_file_path = os.path.join(current_app.config['ROOT_DIR'], path)
+    
+    if not os.path.exists(model_file_path):
+        return jsonify({'error': f'模型文件不存在: {model_file_path}'}), 400
+    
+    # 如果未指定模型类型，尝试自动检测
+    if not model_type:
+        try:
+            # 根据模型名称或内容自动检测类型
+            if 'yolov5' in os.path.basename(path).lower():
+                model_type = 'yolov5'
+            elif 'yolov8' in os.path.basename(path).lower():
+                model_type = 'yolov8'
+            elif 'qrcode' in os.path.basename(path).lower() or 'qr' in os.path.basename(path).lower():
+                model_type = 'yolov8'  # QR码检测模型通常是YOLOv8架构
+            else:
+                # 尝试加载模型，从元数据判断
+                try:
+                    import onnxruntime as ort
+                    session = ort.InferenceSession(model_file_path)
+                    metadata = session.get_modelmeta()
+                    
+                    if hasattr(metadata, 'custom_metadata_map') and metadata.custom_metadata_map:
+                        # YOLOv8特有的metadata键
+                        yolov8_keys = ['stride', 'task', 'batch', 'imgsz']
+                        # YOLOv5特有的metadata键
+                        yolov5_keys = ['model_type', 'size', 'stride']
+                        
+                        # 统计匹配度
+                        v8_count = sum(1 for k in yolov8_keys if k in metadata.custom_metadata_map)
+                        v5_count = sum(1 for k in yolov5_keys if k in metadata.custom_metadata_map)
+                        
+                        if v8_count > v5_count:
+                            model_type = 'yolov8'
+                        else:
+                            model_type = 'yolov5'
+                    else:
+                        # 如果无法确定，默认使用YOLOv8
+                        model_type = 'yolov8'
+                except Exception as e:
+                    print(f"自动检测模型类型失败: {str(e)}")
+                    model_type = 'yolov8'  # 默认使用YOLOv8
+        except Exception as e:
+            print(f"自动检测模型类型失败: {str(e)}")
+            model_type = 'yolov8'  # 默认使用YOLOv8
     
     config_path = os.path.join(current_app.config['ROOT_DIR'], 'config.json')
     try:

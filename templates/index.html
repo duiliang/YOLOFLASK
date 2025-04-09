@@ -10,9 +10,9 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5>目标检测</h5>
-                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modelManagerModal">
-                    <i class="bi bi-diagram-3"></i> 管理模型
-                </button>
+                <a href="{{ url_for('main.model_management') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-diagram-3"></i> 模型管理
+                </a>
             </div>
             <div class="card-body">
                 <div class="mb-3" id="modelLoadedInfo">
@@ -92,6 +92,15 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- 先引入工具库 -->
+<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+
+<!-- 再引入核心功能模块 -->
+<script src="{{ url_for('static', filename='js/detection-core.js') }}"></script>
+<script src="{{ url_for('static', filename='js/image-processor.js') }}"></script>
+<script src="{{ url_for('static', filename='js/detection-ui.js') }}"></script>
+
+<!-- 最后引入应用模块和管理模块 -->
 <script src="{{ url_for('static', filename='js/model-manager.js') }}"></script>
 <script src="{{ url_for('static', filename='js/detection.js') }}"></script>
 {% endblock %}

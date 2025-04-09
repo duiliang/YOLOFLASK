@@ -15,7 +15,9 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">YOLO目标检测系统</a>
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                <i class="bi bi-camera-fill me-2"></i>目标检测系统
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -23,7 +25,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{{ url_for('main.index') }}">首页</a>
+                        <a class="nav-link{% if request.path == url_for('main.index') %} active{% endif %}" aria-current="page" href="{{ url_for('main.index') }}">首页</a>
                     </li>
                 </ul>
             </div>
@@ -33,16 +35,16 @@
     <div class="container-fluid">
         <div class="row">
             <!-- 侧边栏 -->
-            <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" id="sidebarMenu">
-                <div class="position-sticky pt-3">
+            <div class="col-md-3 col-lg-2 d-md-block sidebar sidebar-dark" id="sidebarMenu">
+                <div class="pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link active" href="{{ url_for('main.index') }}">
-                                <i class="bi bi-house-door"></i> 主页
+                            <a class="nav-link{% if request.path == url_for('main.index') %} active{% endif %}" href="{{ url_for('main.index') }}">
+                                <i class="bi bi-house-door"></i> 检测主页
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modelManagerModal">
+                            <a class="nav-link{% if request.path == url_for('main.model_management') %} active{% endif %}" href="{{ url_for('main.model_management') }}">
                                 <i class="bi bi-diagram-3"></i> 模型管理
                             </a>
                         </li>
@@ -51,13 +53,27 @@
                                 <i class="bi bi-gear"></i> 系统设置
                             </a>
                         </li>
+                        <li class="nav-item mt-4">
+                            <div class="px-3 py-2">
+                                <div class="d-flex align-items-center text-light-emphasis small">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <span>系统状态</span>
+                                </div>
+                                <div class="px-2 py-1 mt-2 small">
+                                    <div class="d-flex justify-content-between text-light-emphasis">
+                                        <span>当前模型:</span>
+                                        <span id="sidebarModelStatus" class="text-white-50">加载中...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>
 
             <!-- 主内容区 -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 border-bottom">
                     <h1 class="h2">{% block page_title %}YOLO目标检测{% endblock %}</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <button type="button" class="btn btn-sm btn-outline-secondary d-md-none" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
@@ -70,69 +86,9 @@
         </div>
     </div>
 
-    <!-- 模型管理模态框 -->
-    <div class="modal fade" id="modelManagerModal" tabindex="-1" aria-labelledby="modelManagerModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modelManagerModalLabel">模型管理</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- 模型列表 -->
-                    <div class="table-responsive">
-                        <table class="table table-striped table-sm" id="modelTable">
-                            <thead>
-                                <tr>
-                                    <th>模型名称</th>
-                                    <th>模型类型</th>
-                                    <th>模型路径</th>
-                                    <th>描述</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody id="modelTableBody">
-                                <!-- 模型列表将通过JS动态加载 -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- 添加新模型 -->
-                    <div class="mt-4">
-                        <h5>添加新模型</h5>
-                        <form id="addModelForm" class="row g-3">
-                            <div class="col-md-6">
-                                <label for="modelName" class="form-label">模型名称</label>
-                                <input type="text" class="form-control" id="modelName" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="modelType" class="form-label">模型类型</label>
-                                <select class="form-select" id="modelType" required>
-                                    <option value="yolov8">YOLOv8</option>
-                                    <option value="yolov5">YOLOv5</option>
-                                </select>
-                            </div>
-                            <div class="col-md-12">
-                                <label for="modelPath" class="form-label">模型路径</label>
-                                <input type="text" class="form-control" id="modelPath" required placeholder="models/model.onnx">
-                            </div>
-                            <div class="col-md-12">
-                                <label for="modelDescription" class="form-label">描述</label>
-                                <textarea class="form-control" id="modelDescription" rows="2"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-primary">添加模型</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <footer class="footer mt-auto py-3 bg-light">
         <div class="container text-center">
-            <span class="text-muted">&copy; 2025 YOLO目标检测系统</span>
+            <span class="text-muted">&copy; 2025 深度学习目标检测系统</span>
         </div>
     </footer>
 

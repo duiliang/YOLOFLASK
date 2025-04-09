@@ -3,14 +3,21 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    overflow-x: hidden; /* 防止水平滚动 */
 }
 
 main {
+    padding: 1rem;
+    min-height: calc(100vh - 60px); /* 视口高度减去页脚高度 */
     flex: 1;
 }
 
 .footer {
     margin-top: 2rem;
+    padding: 1rem 0;
+    border-top: 1px solid #e9ecef;
 }
 
 /* 卡片样式 */
@@ -19,11 +26,15 @@ main {
     margin-bottom: 1.5rem;
     border-radius: 8px;
     overflow: hidden;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 .card-header {
     font-weight: bold;
     padding: 0.75rem 1.25rem;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
 }
 
 /* 按钮样式 */
@@ -96,7 +107,156 @@ main {
     border-radius: 4px;
 }
 
+/* 导航栏样式优化 */
+.navbar {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    height: 56px;
+    z-index: 1030; /* 确保导航栏在侧边栏之上 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* 导航栏样式 */
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* 整体布局 */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    padding-top: 56px; /* 为固定导航栏预留空间 */
+}
+
+/* 内容容器 */
+.container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+    display: flex;
+    flex: 1;
+}
+
+/* 行容器 */
+.container-fluid .row {
+    width: 100%;
+    margin: 0;
+    flex: 1;
+}
+
+/* 侧边栏样式 */
+.sidebar {
+    position: fixed;
+    top: 56px; /* 紧贴导航栏底部 */
+    bottom: 0;
+    left: 0;
+    width: 16.666667%; /* col-md-2的宽度 */
+    z-index: 100;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: #212529; /* 与navbar的bg-dark保持一致 */
+    padding: 0;
+}
+
+@media (min-width: 992px) {
+    .sidebar {
+        width: 16.666667%; /* col-lg-2的宽度 */
+    }
+    
+    main.col-lg-10 {
+        margin-left: 16.666667%;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .sidebar {
+        width: 25%; /* col-md-3的宽度 */
+    }
+    
+    main.col-md-9 {
+        margin-left: 25%;
+    }
+}
+
+/* 主内容区 */
+main {
+    padding: 1rem;
+    flex: 1;
+}
+
+@media (max-width: 767.98px) {
+    .sidebar {
+        position: fixed;
+        top: 56px;
+        width: 100%;
+        height: auto;
+        z-index: 1020;
+    }
+    
+    main {
+        margin-left: 0 !important;
+    }
+}
+
+/* 侧边栏链接 */
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar .nav-link:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .nav-link.active {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-left: 4px solid #0d6efd; 
+    padding-left: calc(1rem - 4px);
+}
+
+.sidebar .nav-link i {
+    margin-right: 0.5rem;
+    width: 20px;
+    text-align: center;
+}
+
+/* 页脚样式 */
+.footer {
+    margin-top: auto;
+    background-color: #f8f9fa;
+    padding: 1rem 0;
+}
+
 /* 响应式调整 */
+@media (max-width: 767.98px) {
+    .sidebar {
+        position: static;
+        height: auto;
+        padding-top: 0;
+    }
+    
+    main {
+        margin-left: 0 !important;
+    }
+}
+
 @media (max-width: 768px) {
     .card-body {
         padding: 1rem;
