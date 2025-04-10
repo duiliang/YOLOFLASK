@@ -9,7 +9,7 @@
         "default_type": "yolov8",
         "conf_threshold": 0.25,
         "iou_threshold": 0.45,
-        "current_model": "QR Code Detector2"
+        "current_model": "QR Code Detector"
     },
     "models": [
         {
