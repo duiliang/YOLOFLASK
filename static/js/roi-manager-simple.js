@@ -631,6 +631,26 @@ function drawCanvas() {
         ctx.fill();
         ctx.stroke();
         
+        // 绘制ROI序号
+        ctx.fillStyle = roi.color || '#007bff';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // 计算文本位置 - 左上角附近
+        const textX = roi.x1 + 20;
+        const textY = roi.y1 + 20;
+        
+        // 绘制白色背景使文本更清晰
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(textX, textY, 12, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 绘制序号文本
+        ctx.fillStyle = roi.color || '#007bff';
+        ctx.fillText((i + 1).toString(), textX, textY);
+        
         // 如果被选中，绘制控制点
         if (i === selectedRoiIndex) {
             drawControlPoints(roi);

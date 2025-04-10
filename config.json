@@ -29,16 +29,168 @@
     },
     "roi_configs": {
         "qrcodeTest": {
+            "background": "/static/uploads/roi_bg_resized_20250410_124054_00000010.jpg",
             "name": "qrcodeTest",
-            "background": "/static/uploads/roi_bg_resized_20250410_123006_00000053.jpg",
             "rois": [
                 {
+                    "color": "#007bff",
                     "type": "rectangle",
                     "x1": 88,
-                    "y1": 19,
                     "x2": 549,
-                    "y2": 477,
+                    "y1": 19,
+                    "y2": 477
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 71,
+                    "y1": 212,
+                    "x2": 492,
+                    "y2": 320,
+                    "color": "#6f42c1"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 101,
+                    "y1": 368,
+                    "x2": 357,
+                    "y2": 475,
+                    "color": "#28a745"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 21,
+                    "y1": 64,
+                    "x2": 94,
+                    "y2": 140,
+                    "color": "#28a745"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 137,
+                    "y1": 106,
+                    "x2": 217,
+                    "y2": 158,
+                    "color": "#e83e8c"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 234,
+                    "y1": 89,
+                    "x2": 304,
+                    "y2": 152,
+                    "color": "#20c997"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 359,
+                    "y1": 75,
+                    "x2": 413,
+                    "y2": 142,
+                    "color": "#e83e8c"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 473,
+                    "y1": 93,
+                    "x2": 518,
+                    "y2": 175,
+                    "color": "#e83e8c"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 424,
+                    "y1": 236,
+                    "x2": 453,
+                    "y2": 311,
+                    "color": "#6c757d"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 171,
+                    "y1": 233,
+                    "x2": 232,
+                    "y2": 299,
+                    "color": "#e83e8c"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 450,
+                    "y1": 358,
+                    "x2": 492,
+                    "y2": 428,
                     "color": "#007bff"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 372,
+                    "y1": 356,
+                    "x2": 415,
+                    "y2": 452,
+                    "color": "#fd7e14"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 191,
+                    "y1": 345,
+                    "x2": 236,
+                    "y2": 416,
+                    "color": "#20c997"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 277,
+                    "y1": 202,
+                    "x2": 297,
+                    "y2": 266,
+                    "color": "#e83e8c"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 342,
+                    "y1": 201,
+                    "x2": 374,
+                    "y2": 329,
+                    "color": "#20c997"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 54,
+                    "y1": 307,
+                    "x2": 85,
+                    "y2": 381,
+                    "color": "#e83e8c"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 388,
+                    "y1": 504,
+                    "x2": 433,
+                    "y2": 592,
+                    "color": "#6c757d"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 157,
+                    "y1": 520,
+                    "x2": 245,
+                    "y2": 587,
+                    "color": "#dc3545"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 65,
+                    "y1": 519,
+                    "x2": 133,
+                    "y2": 598,
+                    "color": "#dc3545"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 523,
+                    "y1": 358,
+                    "x2": 549,
+                    "y2": 445,
+                    "color": "#6f42c1"
                 }
             ]
         }
