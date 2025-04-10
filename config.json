@@ -28,6 +28,19 @@
         ]
     },
     "roi_configs": {
-        
+        "qrcodeTest": {
+            "name": "qrcodeTest",
+            "background": "/static/uploads/roi_bg_resized_20250410_123006_00000053.jpg",
+            "rois": [
+                {
+                    "type": "rectangle",
+                    "x1": 88,
+                    "y1": 19,
+                    "x2": 549,
+                    "y2": 477,
+                    "color": "#007bff"
+                }
+            ]
+        }
     }
 }

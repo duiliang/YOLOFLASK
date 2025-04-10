@@ -550,13 +550,13 @@ function handleMouseUp(event) {
                 return;
             }
             
-            // 创建ROI对象
+            // 创建ROI对象，确保所有坐标值为整数
             const roi = {
                 type: 'rectangle',
-                x1: x1,
-                y1: y1,
-                x2: x2,
-                y2: y2,
+                x1: Math.round(x1),
+                y1: Math.round(y1),
+                x2: Math.round(x2),
+                y2: Math.round(y2),
                 color: currentShape.color
             };
             
@@ -664,10 +664,10 @@ function drawControlPoints(roi) {
         { x: roi.x2, y: roi.y1 },
         { x: roi.x1, y: roi.y2 },
         { x: roi.x2, y: roi.y2 },
-        { x: (roi.x1 + roi.x2) / 2, y: roi.y1 },
-        { x: (roi.x1 + roi.x2) / 2, y: roi.y2 },
-        { x: roi.x1, y: (roi.y1 + roi.y2) / 2 },
-        { x: roi.x2, y: (roi.y1 + roi.y2) / 2 }
+        { x: Math.round((roi.x1 + roi.x2) / 2), y: roi.y1 },
+        { x: Math.round((roi.x1 + roi.x2) / 2), y: roi.y2 },
+        { x: roi.x1, y: Math.round((roi.y1 + roi.y2) / 2) },
+        { x: roi.x2, y: Math.round((roi.y1 + roi.y2) / 2) }
     ];
     
     // 绘制控制点

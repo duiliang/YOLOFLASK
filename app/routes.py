@@ -8,6 +8,7 @@ import json
 from datetime import datetime
 from app import socketio
 from app.yolo_detector import YOLODetector
+from app.yolomodel.preprocessor import ImagePreprocessor
 
 # 创建蓝图
 bp = Blueprint('main', __name__)
@@ -370,51 +371,44 @@ def upload_roi_background():
         return jsonify({'error': '没有选择文件'}), 400
     
     if file and allowed_file(file.filename):
+        # 使用统一的uploads目录，不再创建子文件夹
+        uploads_dir = current_app.config['UPLOAD_FOLDER']
+        
         # 保存原始文件
         filename = secure_filename(file.filename)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         new_filename = f"roi_bg_{timestamp}_{filename}"
-        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], new_filename)
+        filepath = os.path.join(uploads_dir, new_filename)
         file.save(filepath)
         
-        # 调整图像大小为640x640
         try:
+            # 读取原始图像
             image = cv2.imread(filepath)
             if image is None:
                 return jsonify({'error': '无法读取图像'}), 400
             
-            # 调整大小并保持纵横比
-            h, w = image.shape[:2]
+            # 使用ImagePreprocessor进行预处理，这里我们只需要处理后的显示图像
+            preprocessor = ImagePreprocessor(640, 640)
+            input_tensor, _ = preprocessor.preprocess(image)  # 忽略预处理参数
             
-            # 确定目标大小
-            target_size = (640, 640)
+            # 从预处理结果中获取图像数据并转回OpenCV格式用于显示
+            display_img = input_tensor[0]  # 移除批次维度
+            display_img = np.transpose(display_img, (1, 2, 0))  # CHW -> HWC
+            display_img = display_img[:, :, ::-1]  # RGB -> BGR (OpenCV格式)
+            display_img = (display_img * 255).astype(np.uint8)  # [0-1] -> [0-255]
             
-            # 创建白色背景
-            background = np.ones((target_size[0], target_size[1], 3), dtype=np.uint8) * 255
-            
-            # 计算缩放比例
-            scale = min(target_size[0] / h, target_size[1] / w)
-            new_h, new_w = int(h * scale), int(w * scale)
-            
-            # 调整图像大小
-            resized_image = cv2.resize(image, (new_w, new_h))
-            
-            # 计算图像在背景中的位置（居中）
-            y_offset = (target_size[0] - new_h) // 2
-            x_offset = (target_size[1] - new_w) // 2
-            
-            # 将调整大小的图像放置在白色背景上
-            background[y_offset:y_offset+new_h, x_offset:x_offset+new_w] = resized_image
+            # 生成处理后的文件名
+            processed_filename = f"roi_bg_resized_{timestamp}_{filename}"
+            processed_filepath = os.path.join(uploads_dir, processed_filename)
             
             # 保存处理后的图像
-            processed_filename = f"roi_bg_resized_{timestamp}_{filename}"
-            processed_filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], processed_filename)
-            cv2.imwrite(processed_filepath, background)
+            cv2.imwrite(processed_filepath, display_img)
             
-            # 返回处理后的图像URL
+            # 返回处理后的图像URL (相对路径)
             return jsonify({
                 'success': True,
                 'url': f"/static/uploads/{processed_filename}"
+                # 不再返回预处理参数，因为ROI阶段不需要
             })
         except Exception as e:
             return jsonify({'error': f'处理图像出错: {str(e)}'}), 500

@@ -54,8 +54,8 @@ def create_app(test_config=None):
     # 配置应用
     app.config.from_mapping(
         SECRET_KEY='dev',
-        UPLOAD_FOLDER=os.path.join(root_dir, 'static/uploads'),
-        RESULT_FOLDER=os.path.join(root_dir, 'static/results'),
+        UPLOAD_FOLDER=os.path.join(root_dir, 'static/uploads'),#TODO 打包进行更改输出路径
+        RESULT_FOLDER=os.path.join(root_dir, 'static/results'),#TODO 打包进行更改输出路径
         MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # 16MB上传限制
         ALLOWED_EXTENSIONS={'png', 'jpg', 'jpeg'},
     )
