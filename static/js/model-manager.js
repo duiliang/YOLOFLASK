@@ -122,7 +122,7 @@ function renderModelList(models) {
     
     if (models.length === 0) {
         const emptyRow = document.createElement('tr');
-        emptyRow.innerHTML = `<td colspan="5" class="text-center">暂无模型</td>`;
+        emptyRow.innerHTML = `<td colspan="6" class="text-center">暂无模型</td>`;
         modelTableBody.appendChild(emptyRow);
         return;
     }
@@ -132,29 +132,45 @@ function renderModelList(models) {
         .then(config => {
             const currentModelName = config.model.current_model;
             
-            // 渲染每个模型行
             models.forEach(model => {
                 const row = document.createElement('tr');
-                const isCurrentModel = (model.name === currentModelName);
                 
-                if (isCurrentModel) {
-                    row.className = 'table-success';
+                // 如果是当前使用的模型，添加标识
+                if (model.name === currentModelName) {
+                    row.classList.add('table-success');
+                }
+                
+                // 获取模型类别信息展示
+                let classesHtml = '';
+                if (model.classes && model.classes.length > 0) {
+                    // 最多显示5个类别，超过则显示...
+                    const visibleClasses = model.classes.slice(0, 5);
+                    const hiddenCount = Math.max(0, model.classes.length - 5);
+                    classesHtml = `
+                        <div>
+                            <span class="badge bg-primary me-1">共${model.classes.length}个类别</span>
+                            ${visibleClasses.map(c => `<span class="badge bg-info text-dark me-1">${c}</span>`).join('')}
+                            ${hiddenCount > 0 ? `<span class="badge bg-secondary">+${hiddenCount}个</span>` : ''}
+                        </div>
+                    `;
+                } else {
+                    classesHtml = '<span class="text-muted">未提取类别信息</span>';
                 }
                 
                 row.innerHTML = `
                     <td>${model.name}</td>
                     <td>${model.type}</td>
-                    <td>${model.path}</td>
                     <td>${model.description || '-'}</td>
+                    <td>${classesHtml}</td>
                     <td>
-                        ${isCurrentModel ? 
-                            '<span class="badge bg-success">当前使用</span>' : 
-                            `<button class="btn btn-sm btn-primary me-1" data-action="use" data-model="${model.name}">使用</button>`
-                        }
+                        ${model.name === currentModelName ? 
+                            '<span class="badge bg-success">当前使用中</span>' : 
+                            '<button class="btn btn-sm btn-primary" data-action="use" data-model="' + model.name + '">使用</button>'}
+                    </td>
+                    <td>
                         <button class="btn btn-sm btn-danger" data-action="delete" data-model="${model.name}">删除</button>
                     </td>
                 `;
-                
                 modelTableBody.appendChild(row);
             });
         });

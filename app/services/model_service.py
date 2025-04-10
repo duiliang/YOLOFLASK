@@ -81,6 +81,20 @@ def add_model(name, path, model_type=None, description=''):
     if not detected_type:
         detected_type = detect_model_type(model_file_path)
     
+    # 尝试加载模型提取类别信息
+    classes = None
+    try:
+        from app.yolomodel.class_utils import ClassManager
+        import onnxruntime as ort
+        
+        # 创建临时会话提取类别
+        session = ort.InferenceSession(model_file_path)
+        class_manager = ClassManager(model_file_path, session)
+        classes = class_manager.extract_classes_from_model()
+        print(f"从模型 {name} 提取到类别信息: {classes}")
+    except Exception as e:
+        print(f"提取类别信息失败: {str(e)}")
+    
     # 创建模型记录
     new_model = {
         'name': name,
@@ -88,6 +102,10 @@ def add_model(name, path, model_type=None, description=''):
         'type': detected_type or 'unknown',
         'description': description
     }
+    
+    # 如果成功提取到类别，添加到模型信息中
+    if classes:
+        new_model['classes'] = classes
     
     # 将模型添加到配置
     config = get_config()
@@ -97,6 +115,10 @@ def add_model(name, path, model_type=None, description=''):
     # 检查是否已存在同名模型
     for i, model in enumerate(config['models']):
         if model['name'] == name:
+            # 保留原有类别信息（如果存在且当前未提取到）
+            if 'classes' in model and not classes:
+                new_model['classes'] = model['classes']
+                
             config['models'][i] = new_model
             if save_config(config):
                 return True, new_model
@@ -231,6 +253,26 @@ def set_current_model(model_name):
         detector = YOLODetector(model_path, found_model['type'])
         print(f"已加载模型: {model_name}, 路径: {model_path}")
         
+        # 提取类别信息并更新配置（如果未保存或有变化）
+        if detector and detector.classes:
+            classes = detector.classes
+            classes_changed = False
+            
+            # 检查配置中的类别与实际类别是否一致
+            if 'classes' not in found_model or found_model['classes'] != classes:
+                classes_changed = True
+                found_model['classes'] = classes
+                
+                # 更新模型配置
+                for i, model in enumerate(config['models']):
+                    if model['name'] == model_name:
+                        config['models'][i]['classes'] = classes
+                        break
+                
+                # 保存更新后的配置
+                save_config(config)
+                print(f"更新了模型 '{model_name}' 的类别信息: {classes}")
+            
         return True, found_model, detector
     except Exception as e:
         return False, f'模型加载失败: {str(e)}', None
