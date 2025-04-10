@@ -4,6 +4,7 @@
 import cv2
 import numpy as np
 import time
+from .logger import get_logger
 
 class YOLOPostprocessor:
     """YOLO后处理器类，处理模型输出"""
@@ -18,6 +19,7 @@ class YOLOPostprocessor:
         """
         self.conf_threshold = conf_threshold
         self.iou_threshold = iou_threshold
+        self.logger = get_logger("YOLO", "info")
     
     def postprocess(self, model_output, preprocess_params, model_type='yolov8'):
         """
@@ -60,14 +62,13 @@ class YOLOPostprocessor:
             
             # 检查输出形状，判断是哪种格式的YOLOv8输出
             output_shape = output.shape
-            detection_timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
             
             # 打印出输出形状，用于调试
-            print(f"[{detection_timestamp}] YOLOv8输出形状: {output_shape}")
+            self.logger.info(f"YOLOv8输出形状: {output_shape}")
             
             # 处理不同格式的YOLOv8输出
             if len(output_shape) == 3 and output_shape[1] <= 5:  # 新版本格式 [batch, 5, 8400] - YOLOv8检测
-                print(f"[{detection_timestamp}] 检测到YOLOv8-Detect格式输出")
+                self.logger.info(f"检测到YOLOv8-Detect格式输出")
                 # 获取输出并转置 [batch, 5, 8400] -> [batch, 8400, 5]
                 output = np.transpose(output, (0, 2, 1))
                 
@@ -80,7 +81,7 @@ class YOLOPostprocessor:
                 
                 # 根据置信度阈值筛选检测结果
                 mask = confidences > self.conf_threshold
-                print(f"[{detection_timestamp}] 检测到 {np.sum(mask)} 个目标(置信度 > {self.conf_threshold})")
+                self.logger.info(f"检测到 {np.sum(mask)} 个目标(置信度 > {self.conf_threshold})")
                 
                 # 应用mask筛选
                 boxes = boxes[mask]  # 重要：这里要更新boxes变量，而不是创建新变量
@@ -90,11 +91,11 @@ class YOLOPostprocessor:
                 class_ids = np.zeros(len(scores), dtype=np.int32)
                 
                 if len(scores) == 0:
-                    print(f"[{detection_timestamp}] 没有检测到足够置信度的目标")
+                    self.logger.info(f"没有检测到足够置信度的目标")
                     return [], [], []
                 
             elif len(output_shape) == 3:  # 新版本格式 [batch, 85, 8400] - YOLOv8分类
-                print(f"[{detection_timestamp}] 检测到YOLOv8-Classify/Segment格式输出")
+                self.logger.info(f"检测到YOLOv8-Classify/Segment格式输出")
                 # 转置以获得传统格式 [batch, 8400, 85]
                 output = np.transpose(output, (0, 2, 1))
                 
@@ -114,7 +115,7 @@ class YOLOPostprocessor:
                 filtered_conf = object_conf[mask]
                 
                 if len(filtered_conf) == 0:
-                    print(f"[{detection_timestamp}] 没有检测到足够置信度的目标")
+                    self.logger.info(f"没有检测到足够置信度的目标")
                     return [], [], []
                 
                 # 提取类别分数(第6列及之后)，并与置信度相乘
@@ -132,11 +133,11 @@ class YOLOPostprocessor:
                 class_ids = best_class_ids[mask2]
                 
                 if len(scores) == 0:
-                    print(f"[{detection_timestamp}] 没有检测到足够类别置信度的目标")
+                    self.logger.info(f"没有检测到足够类别置信度的目标")
                     return [], [], []
                 
             else:  # 传统格式 [batch, num_detections, 4+1+num_classes]
-                print(f"[{detection_timestamp}] 检测到传统YOLOv8格式输出")
+                self.logger.info(f"检测到传统YOLOv8格式输出")
                 # 提取置信度分数(第5列)
                 scores = output[:, 4]
                 
@@ -146,7 +147,7 @@ class YOLOPostprocessor:
                 filtered_scores = scores[mask]
                 
                 if len(filtered_scores) == 0:
-                    print(f"[{detection_timestamp}] 没有检测到足够置信度的目标")
+                    self.logger.info(f"没有检测到足够置信度的目标")
                     return [], [], []
                 
                 # 提取类别概率(第6列及之后)
@@ -166,7 +167,7 @@ class YOLOPostprocessor:
                 class_ids = class_ids[mask2]
                 
                 if len(scores) == 0:
-                    print(f"[{detection_timestamp}] 没有检测到足够类别置信度的目标")
+                    self.logger.info(f"没有检测到足够类别置信度的目标")
                     return [], [], []
             
             # 转换坐标(中心点xy,宽高wh -> 左上角xyxy)
@@ -179,13 +180,13 @@ class YOLOPostprocessor:
             boxes_list = boxes.tolist()
             scores_list = scores.tolist()  # 确保是一维列表
             
-            print(f"[{detection_timestamp}] 执行NMS: boxes类型: {type(boxes_list)}, scores类型: {type(scores_list)}")
-            print(f"[{detection_timestamp}] boxes长度: {len(boxes_list)}, scores长度: {len(scores_list)}")
+            self.logger.info(f"执行NMS: boxes类型: {type(boxes_list)}, scores类型: {type(scores_list)}")
+            self.logger.info(f"boxes长度: {len(boxes_list)}, scores长度: {len(scores_list)}")
             
             if len(boxes_list) > 0 and len(scores_list) > 0:
                 # 确保boxes和scores长度相同
                 if len(boxes_list) != len(scores_list):
-                    print(f"[{detection_timestamp}] 警告: boxes长度({len(boxes_list)})和scores长度({len(scores_list)})不一致，截断到较小长度")
+                    self.logger.warning(f"警告: boxes长度({len(boxes_list)})和scores长度({len(scores_list)})不一致，截断到较小长度")
                     min_len = min(len(boxes_list), len(scores_list))
                     boxes_list = boxes_list[:min_len]
                     scores_list = scores_list[:min_len]
@@ -209,20 +210,20 @@ class YOLOPostprocessor:
                         final_class_ids = class_ids[indices]
                     
                     process_time = time.time() - start_time
-                    print(f"[{detection_timestamp}] NMS后保留 {len(final_boxes)} 个目标 (处理耗时: {process_time*1000:.2f}ms)")
+                    self.logger.info(f"NMS后保留 {len(final_boxes)} 个目标 (处理耗时: {process_time*1000:.2f}ms)")
                     return final_boxes, final_scores, final_class_ids
                 else:
-                    print(f"[{detection_timestamp}] NMS后没有保留的目标")
+                    self.logger.info(f"NMS后没有保留的目标")
             
             # 如果没有结果或NMS后没有留下的框
             return [], [], []
         
         except Exception as e:
             # 详细记录错误信息，便于调试
-            print(f"YOLOv8后处理错误: {str(e)}")
-            print(f"输出形状: {output.shape if hasattr(output, 'shape') else 'unknown'}")
+            self.logger.error(f"YOLOv8后处理错误: {str(e)}")
+            self.logger.error(f"输出形状: {output.shape if hasattr(output, 'shape') else 'unknown'}")
             import traceback
-            traceback.print_exc()
+            self.logger.error(traceback.format_exc())
             return [], [], []
     
     def _xywh2xyxy(self, boxes):

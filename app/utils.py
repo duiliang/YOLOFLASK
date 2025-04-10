@@ -1,91 +1,93 @@
 """
-工具函数模块，提供日志记录等实用功能
+工具函数模块，提供通用功能和日志记录的桥接
 """
 import time
 import datetime
 import os
 import json
+from app.yolomodel.logger import get_logger, ensure_log_dir
 
-class Logger:
-    """标准日志记录类"""
+# 导出日志获取函数，保持向后兼容性
+get_logger = get_logger
+
+# 创建一个应用级别的默认记录器
+app_logger = get_logger(name="APP", level="INFO")
+
+def get_config_path():
+    """
+    获取配置文件路径
+    支持正常运行和打包后的场景
     
-    LOG_LEVELS = {
-        'DEBUG': 10,
-        'INFO': 20,
-        'WARNING': 30,
-        'ERROR': 40,
-        'CRITICAL': 50
+    Returns:
+        配置文件的绝对路径
+    """
+    import sys
+    if getattr(sys, 'frozen', False):
+        # PyInstaller打包后的情况
+        base_dir = os.path.dirname(sys.executable)
+    else:
+        # 正常运行的情况
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    
+    return os.path.join(base_dir, 'config.json')
+
+def load_config():
+    """
+    加载配置文件
+    
+    Returns:
+        配置字典，如果加载失败则返回默认配置
+    """
+    default_config = {
+        "server": {
+            "host": "0.0.0.0",
+            "port": 5000,
+            "debug": False
+        },
+        "model": {
+            "conf_threshold": 0.25,
+            "iou_threshold": 0.45,
+            "current_model": ""
+        },
+        "models": [],
+        "upload": {
+            "allowed_extensions": ["jpg", "jpeg", "png", "bmp"],
+            "max_size_mb": 10
+        }
     }
     
-    def __init__(self, name="YOLODetector", log_level="INFO"):
-        """
-        初始化日志记录器
+    try:
+        config_path = get_config_path()
+        app_logger.info(f"加载配置文件: {config_path}")
         
-        Args:
-            name: 日志名称
-            log_level: 日志级别，可选值 DEBUG, INFO, WARNING, ERROR, CRITICAL
-        """
-        self.name = name
-        self.level = self.LOG_LEVELS.get(log_level.upper(), 20)  # 默认INFO级别
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+            app_logger.info("配置文件加载成功")
+            return config
+    except Exception as e:
+        app_logger.error(f"加载配置文件失败: {str(e)}，使用默认配置")
+        return default_config
+
+def get_current_model_name():
+    """
+    获取当前加载的模型名称
+    
+    Returns:
+        当前模型名称，如果未设置则返回'未知模型'
+    """
+    config = load_config()
+    return config.get('model', {}).get('current_model', '未知模型')
+
+def format_timestamp(timestamp=None):
+    """
+    格式化时间戳
+    
+    Args:
+        timestamp: 时间戳，如果为None则使用当前时间
         
-        # 创建日志目录
-        self.log_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'logs')
-        os.makedirs(self.log_dir, exist_ok=True)
-        
-        # 日志文件名格式: logs/YYYY-MM-DD.log
-        date_str = datetime.datetime.now().strftime('%Y-%m-%d')
-        self.log_file = os.path.join(self.log_dir, f"{date_str}.log")
-    
-    def _get_config(self):
-        """获取当前配置信息"""
-        try:
-            config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config.json')
-            with open(config_path, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-                return config
-        except Exception:
-            return {}
-    
-    def _get_current_model(self):
-        """获取当前加载的模型名称"""
-        config = self._get_config()
-        return config.get('model', {}).get('current_model', '未知模型')
-    
-    def _format_message(self, level, message):
-        """格式化日志消息"""
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-        model_name = self._get_current_model()
-        return f"[{timestamp}] [{self.name}] [{level}] [模型: {model_name}] {message}"
-    
-    def _log(self, level, level_name, message):
-        """记录日志"""
-        if level >= self.level:
-            formatted_message = self._format_message(level_name, message)
-            print(formatted_message)
-            
-            # 同时写入日志文件
-            try:
-                with open(self.log_file, 'a', encoding='utf-8') as f:
-                    f.write(formatted_message + '\n')
-            except Exception as e:
-                print(f"写入日志文件失败: {str(e)}")
-    
-    def debug(self, message):
-        """记录调试级别日志"""
-        self._log(10, 'DEBUG', message)
-    
-    def info(self, message):
-        """记录信息级别日志"""
-        self._log(20, 'INFO', message)
-    
-    def warning(self, message):
-        """记录警告级别日志"""
-        self._log(30, 'WARNING', message)
-    
-    def error(self, message):
-        """记录错误级别日志"""
-        self._log(40, 'ERROR', message)
-    
-    def critical(self, message):
-        """记录严重错误级别日志"""
-        self._log(50, 'CRITICAL', message)
+    Returns:
+        格式化的时间字符串
+    """
+    if timestamp is None:
+        timestamp = time.time()
+    return datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')

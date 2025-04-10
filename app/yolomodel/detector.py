@@ -10,6 +10,7 @@ from .class_utils import ClassManager
 from .preprocessor import ImagePreprocessor
 from .postprocessor import YOLOPostprocessor
 from .visualizer import DetectionVisualizer
+from .logger import get_logger
 
 class YOLODetector:
     """
@@ -24,6 +25,9 @@ class YOLODetector:
             model_path: ONNX模型文件的路径
             model_type: 模型类型，目前支持'yolov8'
         """
+        # 初始化日志
+        self.logger = get_logger("YOLO", "info")
+        
         self.model_path = model_path
         self.model_type = model_type
         
@@ -35,7 +39,9 @@ class YOLODetector:
         try:
             self.session = ort.InferenceSession(model_path)
         except Exception as e:
-            raise Exception(f"加载ONNX模型失败: {str(e)}")
+            error_msg = f"加载ONNX模型失败: {str(e)}"
+            self.logger.error(error_msg)
+            raise Exception(error_msg)
             
         # 获取模型输入输出信息
         self.input_name = self.session.get_inputs()[0].name
@@ -65,7 +71,7 @@ class YOLODetector:
         self.postprocessor = YOLOPostprocessor(self.conf_threshold, self.iou_threshold)
         self.visualizer = DetectionVisualizer(self.classes)
         
-        print(f"YOLO检测器初始化成功: {model_type}, 输入尺寸: {self.input_width}x{self.input_height}")
+        self.logger.info(f"YOLO检测器初始化成功: {model_type}, 输入尺寸: {self.input_width}x{self.input_height}")
     
     def load_config(self):
         """加载配置文件"""
@@ -119,13 +125,15 @@ class YOLODetector:
         outputs = self.session.run(self.output_names, {self.input_name: input_tensor})
         inference_time = time.time() - start_time
         detection_timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-        print(f"[{detection_timestamp}] 推理时间: {inference_time*1000:.2f} ms")
+        self.logger.info(f"[{detection_timestamp}] 推理时间: {inference_time*1000:.2f} ms")
         
         # 后处理结果 (根据模型类型)
         if self.model_type == 'yolov8':
             boxes, scores, class_ids = self.postprocessor.postprocess_yolov8(outputs[0], preprocess_params)
         else:
-            raise ValueError(f"不支持的模型类型: {self.model_type}")
+            error_msg = f"不支持的模型类型: {self.model_type}"
+            self.logger.error(error_msg)
+            raise ValueError(error_msg)
         
         # 在图像上绘制检测结果
         result_image = self.visualizer.draw_detections(image.copy(), boxes, scores, class_ids)
