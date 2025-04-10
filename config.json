@@ -26,5 +26,8 @@
             "jpeg",
             "png"
         ]
+    },
+    "roi_configs": {
+        
     }
 }

@@ -41,6 +41,12 @@ def model_management():
     return render_template('model-management.html')
 
 
+@bp.route('/roi-management')
+def roi_management():
+    """ROI区域管理页面路由"""
+    return render_template('roi-management.html')
+
+
 @bp.route('/config.json')
 def get_config():
     """获取配置文件内容"""
@@ -287,6 +293,131 @@ def upload_file():
             'filename': new_filename,
             'filepath': filepath
         })
+    
+    return jsonify({'error': '不支持的文件类型'}), 400
+
+
+@bp.route('/api/roi-configs', methods=['GET'])
+def get_roi_configs():
+    """获取所有ROI配置"""
+    config_path = os.path.join(current_app.config['ROOT_DIR'], 'config.json')
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+            return jsonify(config.get('roi_configs', {}))
+    except Exception as e:
+        return jsonify({'error': f'无法读取ROI配置: {str(e)}'}), 500
+
+
+@bp.route('/api/roi-configs', methods=['POST'])
+def save_roi_configs():
+    """保存ROI配置"""
+    data = request.json
+    if not data:
+        return jsonify({'error': '无效的请求数据'}), 400
+    
+    config_path = os.path.join(current_app.config['ROOT_DIR'], 'config.json')
+    try:
+        # 读取当前配置
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        
+        # 更新ROI配置
+        config['roi_configs'] = data
+        
+        # 保存配置
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=4, ensure_ascii=False)
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': f'保存ROI配置失败: {str(e)}'}), 500
+
+
+@bp.route('/api/roi-config/<config_name>', methods=['DELETE'])
+def delete_roi_config(config_name):
+    """删除指定的ROI配置"""
+    config_path = os.path.join(current_app.config['ROOT_DIR'], 'config.json')
+    try:
+        # 读取当前配置
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        
+        # 检查ROI配置是否存在
+        if 'roi_configs' not in config or config_name not in config['roi_configs']:
+            return jsonify({'error': f'找不到ROI配置: {config_name}'}), 404
+        
+        # 删除配置
+        del config['roi_configs'][config_name]
+        
+        # 保存配置
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=4, ensure_ascii=False)
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': f'删除ROI配置失败: {str(e)}'}), 500
+
+
+@bp.route('/api/upload-roi-background', methods=['POST'])
+def upload_roi_background():
+    """处理ROI背景图片上传"""
+    if 'file' not in request.files:
+        return jsonify({'error': '没有文件'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': '没有选择文件'}), 400
+    
+    if file and allowed_file(file.filename):
+        # 保存原始文件
+        filename = secure_filename(file.filename)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        new_filename = f"roi_bg_{timestamp}_{filename}"
+        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], new_filename)
+        file.save(filepath)
+        
+        # 调整图像大小为640x640
+        try:
+            image = cv2.imread(filepath)
+            if image is None:
+                return jsonify({'error': '无法读取图像'}), 400
+            
+            # 调整大小并保持纵横比
+            h, w = image.shape[:2]
+            
+            # 确定目标大小
+            target_size = (640, 640)
+            
+            # 创建白色背景
+            background = np.ones((target_size[0], target_size[1], 3), dtype=np.uint8) * 255
+            
+            # 计算缩放比例
+            scale = min(target_size[0] / h, target_size[1] / w)
+            new_h, new_w = int(h * scale), int(w * scale)
+            
+            # 调整图像大小
+            resized_image = cv2.resize(image, (new_w, new_h))
+            
+            # 计算图像在背景中的位置（居中）
+            y_offset = (target_size[0] - new_h) // 2
+            x_offset = (target_size[1] - new_w) // 2
+            
+            # 将调整大小的图像放置在白色背景上
+            background[y_offset:y_offset+new_h, x_offset:x_offset+new_w] = resized_image
+            
+            # 保存处理后的图像
+            processed_filename = f"roi_bg_resized_{timestamp}_{filename}"
+            processed_filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], processed_filename)
+            cv2.imwrite(processed_filepath, background)
+            
+            # 返回处理后的图像URL
+            return jsonify({
+                'success': True,
+                'url': f"/static/uploads/{processed_filename}"
+            })
+        except Exception as e:
+            return jsonify({'error': f'处理图像出错: {str(e)}'}), 500
     
     return jsonify({'error': '不支持的文件类型'}), 400
 

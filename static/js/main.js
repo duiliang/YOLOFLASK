@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 async function loadConfig() {
     try {
-        const response = await fetch('/static/config.json?t=' + new Date().getTime());
+        const response = await fetch('/config.json?t=' + new Date().getTime());
         if (!response.ok) {
             throw new Error('无法加载配置文件');
         }
