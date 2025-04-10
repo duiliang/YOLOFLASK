@@ -17,6 +17,12 @@
             "path": "D:\\work\\SmartCamera\\smart-camera-publish_real\\smart-camera-pc-publis\\projects\\qrcode\\qqrcode.onnx",
             "type": "yolov8",
             "description": "yolo V8 薛博版 训练模型"
+        },
+        {
+            "name": "MAG",
+            "path": "D:\\work\\SmartCamera\\smart-camera-publish_real\\smart-camera-pc-publis\\projects\\MAG\\data\\bestMAG.onnx",
+            "type": "yolov8",
+            "description": "mag 检测模型"
         }
     ],
     "upload": {

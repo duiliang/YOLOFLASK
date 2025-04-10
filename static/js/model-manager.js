@@ -255,7 +255,7 @@ function useModel(modelName) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ name: modelName })
+        body: JSON.stringify({ model_name: modelName })
     })
     .then(response => response.json())
     .then(data => {

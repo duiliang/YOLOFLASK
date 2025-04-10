@@ -74,17 +74,40 @@ class ClassManager:
                             
                             # 尝试解析为JSON
                             try:
+                                print(f"尝试解析类别数据：{json.loads(class_data)}")
                                 class_names = json.loads(class_data)
+                                print(f"成功解析JSON数据：{type(class_names)}")
                                 
                                 # 根据数据类型进行处理
                                 if isinstance(class_names, dict):
-                                    # 将字典转换为列表，确保索引匹配
-                                    max_idx = max(int(idx) for idx in class_names.keys())
-                                    classes = [''] * (max_idx + 1)
-                                    for idx, name in class_names.items():
-                                        classes[int(idx)] = name
-                                    print(f"从模型中提取到 {len(classes)} 个类别名称（字典格式）")
-                                    return classes
+                                    print(f"处理字典类型的类别数据：{class_names}")
+                                    try:
+                                        # 将字典转换为列表，确保索引匹配
+                                        keys = [int(idx) if isinstance(idx, str) else idx for idx in class_names.keys()]
+                                        if not keys:
+                                            print("警告：类别字典为空")
+                                            return ['unknown']
+                                            
+                                        # 特殊处理：如果只有一个类别，直接返回单元素列表
+                                        if len(keys) == 1:
+                                            class_name = list(class_names.values())[0]
+                                            print(f"检测到单类别模型，类别名: {class_name}")
+                                            return [class_name]
+                                            
+                                        max_idx = max(keys)
+                                        classes = [''] * (max_idx + 1)
+                                        for idx, name in class_names.items():
+                                            idx_int = int(idx) if isinstance(idx, str) else idx
+                                            classes[idx_int] = name
+                                        print(f"从模型中提取到 {len(classes)} 个类别名称（字典格式）")
+                                        return classes
+                                    except Exception as dict_e:
+                                        print(f"处理字典格式类别数据时出错: {str(dict_e)}")
+                                        # 尝试直接将字典值作为类别列表
+                                        if class_names:
+                                            classes = list(class_names.values())
+                                            print(f"退化处理：直接使用字典值作为类别名: {classes}")
+                                            return classes
                                 elif isinstance(class_names, list):
                                     # 如果已经是列表，则直接返回
                                     print(f"从模型中提取到 {len(class_names)} 个类别名称（列表格式）")
@@ -100,6 +123,11 @@ class ClassManager:
                                     # 可能是换行符分隔的类别列表
                                     classes = [c.strip() for c in class_data.split('\n') if c.strip()]
                                     print(f"从模型中提取到 {len(classes)} 个类别名称（换行符分隔格式）")
+                                    return classes
+                                else:
+                                    # 如果没有分隔符，尝试直接解析
+                                    classes = [c.strip() for c in class_data.split(',') if c.strip()]
+                                    print(f"从模型中提取到 {len(classes)} 个类别名称（逗号分隔格式）")
                                     return classes
                         except Exception as inner_e:
                             print(f"解析类别名称失败: {str(inner_e)}")
