@@ -127,7 +127,7 @@ class ClassManager:
                                 else:
                                     # 如果没有分隔符，尝试直接解析
                                     classes = [c.strip() for c in class_data.split(',') if c.strip()]
-                                    print(f"从模型中提取到 {len(classes)} 个类别名称（逗号分隔格式）")
+                                    print(f"从模型中提取到 {len(classes)} 个类别名称（单个字符逗号分隔格式）")
                                     return classes
                         except Exception as inner_e:
                             print(f"解析类别名称失败: {str(inner_e)}")
