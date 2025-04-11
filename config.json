@@ -208,5 +208,25 @@
                 }
             ]
         }
+    },
+    "logic_rules": {
+        "1": {
+            "roi_config": "qrcodeTest",
+            "model": "QR Code Detector",
+            "rules": [
+                {
+                    "roi_id": 7,
+                    "class": "{0: 'qrcode'}",
+                    "operator": "==",
+                    "count": 1
+                },
+                {
+                    "roi_id": 6,
+                    "class": "{0: 'qrcode'}",
+                    "operator": ">=",
+                    "count": 6
+                }
+            ]
+        }
     }
 }

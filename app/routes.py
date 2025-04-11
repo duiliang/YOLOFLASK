@@ -10,9 +10,13 @@ from app.controllers.model_controller import (
 )
 from app.controllers.roi_controller import (
     handle_get_roi_configs, handle_save_roi_configs,
-    handle_delete_roi_config, handle_upload_roi_background
+    handle_delete_roi_config, handle_upload_roi_background,
+    handle_get_roi_config_detail
 )
 from app.controllers.file_controller import handle_upload_file
+from app.controllers.logic_controller import (
+    handle_get_logic_rules, handle_save_logic_rule, handle_delete_logic_rule
+)
 from app.controllers.socket_controller import (
     handle_connect as socket_handle_connect,
     handle_disconnect as socket_handle_disconnect,
@@ -36,6 +40,11 @@ def model_management():
 def roi_management():
     """ROI区域管理页面路由"""
     return render_template('roi-management.html')
+
+@bp.route('/logic-rules')
+def logic_rules():
+    """逻辑规则管理页面路由"""
+    return render_template('logic-rules.html')
 
 @bp.route('/config.json')
 def get_config():
@@ -94,6 +103,11 @@ def get_roi_configs():
     """获取所有ROI配置"""
     return handle_get_roi_configs()
 
+@bp.route('/api/roi-config/<config_name>', methods=['GET'])
+def get_roi_config_detail(config_name):
+    """获取特定ROI配置的详情"""
+    return handle_get_roi_config_detail(config_name)
+
 @bp.route('/api/roi-configs', methods=['POST'])
 def save_roi_configs():
     """保存ROI配置"""
@@ -108,6 +122,21 @@ def delete_roi_config(config_name):
 def upload_roi_background():
     """处理ROI背景图片上传"""
     return handle_upload_roi_background()
+
+@bp.route('/api/logic-rules', methods=['GET'])
+def get_logic_rules():
+    """获取所有逻辑规则配置"""
+    return handle_get_logic_rules()
+
+@bp.route('/api/logic-rules', methods=['POST'])
+def save_logic_rule():
+    """保存逻辑规则配置"""
+    return handle_save_logic_rule()
+
+@bp.route('/api/logic-rules', methods=['DELETE'])
+def delete_logic_rule():
+    """删除指定的逻辑规则配置"""
+    return handle_delete_logic_rule()
 
 @socketio.on('connect')
 def handle_connect():

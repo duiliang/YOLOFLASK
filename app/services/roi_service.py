@@ -25,6 +25,35 @@ def get_roi_configs():
         print(f"ROI配置读取失败: {e}")
         return {}
 
+def get_roi_config_detail(config_name):
+    """
+    获取特定ROI配置的详细信息
+    
+    Args:
+        config_name: ROI配置名称
+        
+    Returns:
+        ROI配置详情，包括背景图片和所有区域信息
+    """
+    try:
+        roi_configs = get_roi_configs()
+        if config_name in roi_configs:
+            return {
+                'success': True,
+                'data': roi_configs[config_name]
+            }
+        else:
+            return {
+                'success': False,
+                'message': f"未找到ROI配置: {config_name}"
+            }
+    except Exception as e:
+        current_app.logger.error(f"获取ROI配置详情失败: {e}")
+        return {
+            'success': False,
+            'message': f"获取ROI配置详情失败: {str(e)}"
+        }
+
 def save_roi_configs(roi_configs):
     """
     保存ROI配置

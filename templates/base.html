@@ -54,6 +54,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link{% if request.path == url_for('main.logic_rules') %} active{% endif %}" href="{{ url_for('main.logic_rules') }}">
+                                <i class="bi bi-list-check"></i> 逻辑规则管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#configModal">
                                 <i class="bi bi-gear"></i> 系统设置
                             </a>

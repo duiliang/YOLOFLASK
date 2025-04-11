@@ -6,7 +6,7 @@ from flask import request, jsonify
 from werkzeug.utils import secure_filename
 from app.utils.file_utils import allowed_file
 from app.services.roi_service import (
-    get_roi_configs, save_roi_configs, 
+    get_roi_configs, save_roi_configs, get_roi_config_detail,
     delete_roi_config as service_delete_roi_config,
     process_roi_background
 )
@@ -18,6 +18,23 @@ def handle_get_roi_configs():
         return jsonify(roi_configs)
     except Exception as e:
         return jsonify({'error': f'无法读取ROI配置: {str(e)}'}), 500
+
+def handle_get_roi_config_detail(config_name):
+    """
+    处理获取特定ROI配置详情的请求
+    
+    Args:
+        config_name: ROI配置名称
+        
+    Returns:
+        ROI配置详情的JSON响应
+    """
+    result = get_roi_config_detail(config_name)
+    
+    if result['success']:
+        return jsonify(result)
+    else:
+        return jsonify({'error': result['message']}), 404
 
 def handle_save_roi_configs():
     """处理保存ROI配置请求"""

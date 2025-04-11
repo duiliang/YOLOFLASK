@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}YOLO目标检测系统 - 逻辑规则管理{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>逻辑规则配置</h5>
+                    <div class="d-flex">
+                        <input type="text" id="ruleNameInput" class="form-control form-control-sm me-2" placeholder="规则配置名称" style="width: 200px;">
+                        <button id="saveRuleBtn" class="btn btn-sm btn-primary">
+                            <i class="bi bi-save"></i> 保存配置
+                        </button>
+                        <button id="deleteRuleBtn" class="btn btn-sm btn-danger ms-2" style="display: none;">
+                            <i class="bi bi-trash"></i> 删除配置
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-5">
+                            <div class="form-group mb-3">
+                                <label for="logicRuleSelector" class="form-label">选择规则配置</label>
+                                <select id="logicRuleSelector" class="form-select">
+                                    <option value="">新建规则配置...</option>
+                                    <!-- 已保存的规则将通过JS动态加载 -->
+                                </select>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="roiConfigSelector" class="form-label">ROI区域配置</label>
+                                <select id="roiConfigSelector" class="form-select">
+                                    <option value="">选择ROI配置...</option>
+                                    <!-- ROI配置将通过JS动态加载 -->
+                                </select>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="modelSelector" class="form-label">检测模型</label>
+                                <select id="modelSelector" class="form-select">
+                                    <option value="">选择模型...</option>
+                                    <!-- 模型列表将通过JS动态加载 -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- ROI预览区域 -->
+                        <div class="col-md-7 d-flex justify-content-center">
+                            <div class="card" style="width: 640px;">
+                                <div class="card-header">
+                                    <h6 class="mb-0">ROI区域预览</h6>
+                                </div>
+                                <div class="card-body p-0 d-flex align-items-center justify-content-center">
+                                    <!-- 画布区域 - 固定640x640大小 -->
+                                    <div class="canvas-container position-relative" style="width: 640px; height: 640px;">
+                                        <!-- 背景图片 -->
+                                        <img id="backgroundImage" src="" alt="请先选择ROI配置" 
+                                             style="position: absolute; top: 0; left: 0; width: 640px; height: 640px; z-index: 0; pointer-events: none; object-fit: cover;">
+                                        <!-- 画布 -->
+                                        <canvas id="roiCanvas" width="640" height="640" 
+                                                style="position: absolute; top: 0; left: 0; z-index: 1; background-color: transparent; border: 1px solid #ddd;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 规则设置区域 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6>规则列表</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-2">
+                                    <label for="roiSelector" class="form-label">ROI区域</label>
+                                    <select id="roiSelector" class="form-select">
+                                        <option value="">选择区域...</option>
+                                        <!-- ROI区域列表将通过JS动态加载 -->
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="classSelector" class="form-label">目标类别</label>
+                                    <select id="classSelector" class="form-select">
+                                        <option value="">选择类别...</option>
+                                        <!-- 类别列表将通过JS动态加载 -->
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="operatorSelector" class="form-label">判断条件</label>
+                                    <select id="operatorSelector" class="form-select">
+                                        <option value="==">==(等于)</option>
+                                        <option value="!=">&lt;&gt;(不等于)</option>
+                                        <option value=">">&gt;(大于)</option>
+                                        <option value="<">&lt;(小于)</option>
+                                        <option value=">=">&gt;=(大于等于)</option>
+                                        <option value="<=">&lt;=(小于等于)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="countInput" class="form-label">数量</label>
+                                    <input type="number" id="countInput" class="form-control" min="0" value="1">
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button id="addRuleBtn" class="btn btn-primary">
+                                        <i class="bi bi-plus"></i> 添加规则
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- 规则列表区域 -->
+                            <div id="ruleListContainer" class="mt-3">
+                                <div class="alert alert-info">请先选择ROI配置和模型，然后添加规则。</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 说明卡片移到最底部 -->
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6>规则说明</h6>
+                </div>
+                <div class="card-body">
+                    <p>在此页面，您可以为ROI区域定义逻辑判断规则，系统将根据这些规则自动判断检测结果是否符合预期。</p>
+                    <p><strong>使用方法：</strong></p>
+                    <ol>
+                        <li>从下拉菜单选择要使用的ROI配置</li>
+                        <li>选择要应用的检测模型</li>
+                        <li>为各个ROI区域添加判断规则</li>
+                        <li>保存规则配置</li>
+                    </ol>
+                    <p><strong>规则格式：</strong> ROI区域 + 目标类别 + 判断条件 + 数量</p>
+                    <p><strong>例如：</strong></p>
+                    <ul>
+                        <li>ROI 1 中有 <code>person == 2</code>：表示区域1必须有2个人</li>
+                        <li>ROI 3 中有 <code>car > 0</code>：表示区域3必须有至少1辆车</li>
+                        <li>ROI 2 中有 <code>bottle <= 3</code>：表示区域2最多有3个瓶子</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Canvas相关样式 */
+    .canvas-container {
+        margin: 0 auto;
+        position: relative;
+    }
+    
+    /* 确保背景图片不会拦截鼠标事件 */
+    #backgroundImage {
+        pointer-events: none;
+        object-fit: contain;
+    }
+    
+    /* 确保画布在前面且透明 */
+    #roiCanvas {
+        position: relative;
+        z-index: 1;
+        background-color: transparent !important;
+    }
+    
+    /* ROI相关样式 */
+    .roi-item {
+        border-left: 4px solid #007bff;
+        margin-bottom: 5px;
+    }
+    
+    .roi-item.active {
+        background-color: #e9f5ff;
+        border-left-color: #0056b3;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- 引入Fabric.js库 -->
+<script src="{{ url_for('static', filename='js/thridPart/fabric.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/logic-rules.js') }}"></script>
+{% endblock %}
