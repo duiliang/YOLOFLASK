@@ -128,7 +128,7 @@ function updateConfigSelect() {
     const configSelect = document.getElementById('configSelect');
     
     // 清空当前选项
-    configSelect.innerHTML = '<option value="" disabled selected>新建配置</option>';
+    configSelect.innerHTML = '<option value="" disabled selected>请选择配置</option>';
     
     // 添加每个配置
     Object.keys(roiConfigs).forEach(configName => {

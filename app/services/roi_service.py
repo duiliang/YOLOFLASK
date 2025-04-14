@@ -8,6 +8,7 @@ from flask import current_app
 import cv2
 from app.yolomodel.preprocessor import ImagePreprocessor
 from app.utils.file_utils import save_uploaded_file
+import numpy as np
 
 def get_roi_configs():
     """
@@ -147,7 +148,13 @@ def process_roi_background(file):
         # 创建预处理器
         preprocessor = ImagePreprocessor(input_width, input_height)
         input_tensor, _ = preprocessor.preprocess(image)
-        
+        # 反向处理
+        # 从NCHW格式转换回HWC格式
+        display_img = input_tensor[0]  # 移除批次维度
+        display_img = np.transpose(display_img, (1, 2, 0))  # CHW -> HWC
+        display_img = display_img[:, :, ::-1]  # RGB -> BGR (OpenCV格式)
+        display_img = (display_img * 255).astype(np.uint8)  # [0-1] -> [0-255]
+        input_tensor = display_img
         # 将处理后的图像保存为新文件
         processed_image = input_tensor.copy()  # 创建副本以避免修改原始张量
         processed_filename = os.path.basename(file_path).replace('roi_bg_', 'roi_bg_resized_')

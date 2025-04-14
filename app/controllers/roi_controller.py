@@ -82,7 +82,7 @@ def handle_upload_roi_background():
         return jsonify({
             'success': True,
             'message': '背景图片上传成功',
-            'image_url': result
+            'url': result
         })
     else:
         return jsonify({'error': result}), 500
