@@ -21,6 +21,16 @@
                     </div>
                 </div>
 
+                <!-- 逻辑规则选择 -->
+                <div class="mb-3">
+                    <label for="logicRuleSelect" class="form-label">选择逻辑规则</label>
+                    <select id="logicRuleSelect" class="form-select">
+                        <option value="" selected>不使用逻辑规则</option>
+                        <!-- 这里会通过JS动态填充规则选项 -->
+                    </select>
+                    <div class="form-text">选择逻辑规则后将自动切换对应模型，并根据规则验证检测结果</div>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label">图像来源</label>
                     <div class="form-check">
@@ -69,6 +79,14 @@
                 <div id="detectionResults" style="display: none;">
                     <h6>检测结果:</h6>
                     <ul id="resultsList" class="list-group"></ul>
+                </div>
+                <!-- 逻辑规则验证结果 -->
+                <div id="ruleValidationResult" style="display: none;" class="mt-3">
+                    <h6>规则验证结果:</h6>
+                    <div id="validationStatus" class="alert">
+                    </div>
+                    <div id="validationDetails">
+                    </div>
                 </div>
             </div>
         </div>

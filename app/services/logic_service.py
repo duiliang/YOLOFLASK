@@ -128,7 +128,7 @@ def validate_detection_results(detection_results, rule_name):
     验证检测结果是否符合逻辑规则
     
     Args:
-        detection_results (dict): 检测结果
+        detection_results (dict or list): 检测结果
         rule_name (str): 规则配置名称
         
     Returns:
@@ -136,12 +136,22 @@ def validate_detection_results(detection_results, rule_name):
     """
     try:
         # 获取规则配置
-        rules = get_logic_rules().get(rule_name)
-        if not rules:
+        all_rules = get_logic_rules()
+        if rule_name not in all_rules:
             return True, f"未找到规则配置 '{rule_name}'"
+            
+        rule_config = all_rules[rule_name]
         
         # 获取所有检测到的对象
-        detections = detection_results.get('detections', [])
+        detections = []
+        if isinstance(detection_results, list):
+            # 如果直接传入的是检测结果数组
+            detections = detection_results
+        elif isinstance(detection_results, dict) and 'detections' in detection_results:
+            # 如果传入的是包含detections的字典
+            detections = detection_results['detections']
+        else:
+            return False, "检测结果格式无效"
         
         # 按ROI区域和类别统计检测结果
         roi_class_counts = {}
@@ -166,7 +176,10 @@ def validate_detection_results(detection_results, rule_name):
         all_passed = True
         failed_rules = []
         
-        for rule in rules.get('rules', []):
+        # 获取规则列表
+        rules_list = rule_config.get('rules', [])
+        
+        for rule in rules_list:
             roi_id = rule.get('roi_id')
             class_name = rule.get('class')
             operator = rule.get('operator')

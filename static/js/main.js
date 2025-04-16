@@ -215,7 +215,7 @@ function saveConfig() {
     // 更新全局配置
     appState.config = config;
     
-    // 向服务器发送配置更新请求
+    // 向服务器发送配置更新请求（暂时不明用途）
     fetch('/update_config', {
         method: 'POST',
         headers: {

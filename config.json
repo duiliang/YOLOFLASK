@@ -63,7 +63,102 @@
                     "y2": 512
                 }
             ]
+        },
+        "2": {
+            "background": "/static/uploads/roi_bg_resized_00000022_20250414_090821_9753.jpg",
+            "name": "2",
+            "rois": [
+                {
+                    "color": "#20c997",
+                    "type": "rectangle",
+                    "x1": 303,
+                    "x2": 504,
+                    "y1": 236,
+                    "y2": 425
+                },
+                {
+                    "color": "#6f42c1",
+                    "type": "rectangle",
+                    "x1": 102,
+                    "x2": 275,
+                    "y1": 216,
+                    "y2": 404
+                }
+            ]
+        },
+        "5": {
+            "name": "5",
+            "background": "/static/uploads/roi_bg_resized_00000006_20250414_094421_3702.jpg",
+            "rois": [
+                {
+                    "type": "rectangle",
+                    "x1": 44,
+                    "y1": 340,
+                    "x2": 202,
+                    "y2": 492,
+                    "color": "#007bff"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 389,
+                    "y1": 359,
+                    "x2": 576,
+                    "y2": 517,
+                    "color": "#20c997"
+                },
+                {
+                    "type": "rectangle",
+                    "x1": 171,
+                    "y1": 48,
+                    "x2": 512,
+                    "y2": 191,
+                    "color": "#6f42c1"
+                }
+            ]
         }
     },
-    "logic_rules": {}
+    "logic_rules": {
+        "test1": {
+            "roi_config": "2",
+            "model": "QR Code Detector",
+            "rules": [
+                {
+                    "class": "{0: 'qrcode'}",
+                    "count": 1,
+                    "operator": "==",
+                    "roi_id": 0
+                },
+                {
+                    "roi_id": 1,
+                    "class": "{0: 'qrcode'}",
+                    "operator": "==",
+                    "count": 0
+                }
+            ]
+        },
+        "true": {
+            "roi_config": "5",
+            "model": "QR Code Detector",
+            "rules": [
+                {
+                    "class": "{0: 'qrcode'}",
+                    "count": 1,
+                    "operator": "==",
+                    "roi_id": 0
+                },
+                {
+                    "class": "{0: 'qrcode'}",
+                    "count": 0,
+                    "operator": "==",
+                    "roi_id": 2
+                },
+                {
+                    "roi_id": 1,
+                    "class": "{0: 'qrcode'}",
+                    "operator": "==",
+                    "count": 0
+                }
+            ]
+        }
+    }
 }

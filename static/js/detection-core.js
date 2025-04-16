@@ -85,8 +85,9 @@ function initSocketConnection() {
 /**
  * 执行目标检测
  * @param {string} imagePath - 图像路径 
+ * @param {string} ruleName - 逻辑规则名称（可选）
  */
-function performDetection(imagePath) {
+function performDetection(imagePath, ruleName) {
     if (!socket) {
         showNotification('WebSocket连接未建立，请刷新页面', 'warning');
         return false;
@@ -106,6 +107,11 @@ function performDetection(imagePath) {
     const detectData = {
         image_path: imagePath
     };
+    
+    // 如果提供了规则名称，则添加到请求数据中
+    if (ruleName) {
+        detectData.rule_name = ruleName;
+    }
     
     // 发送检测请求
     socket.emit('detect', detectData);

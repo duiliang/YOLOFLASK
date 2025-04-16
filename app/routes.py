@@ -15,7 +15,8 @@ from app.controllers.roi_controller import (
 )
 from app.controllers.file_controller import handle_upload_file
 from app.controllers.logic_controller import (
-    handle_get_logic_rules, handle_save_logic_rule, handle_delete_logic_rule
+    handle_get_logic_rules, handle_save_logic_rule, handle_delete_logic_rule,
+    handle_validate_detection  # 添加验证检测结果处理函数
 )
 from app.controllers.socket_controller import (
     handle_connect as socket_handle_connect,
@@ -137,6 +138,11 @@ def save_logic_rule():
 def delete_logic_rule():
     """删除指定的逻辑规则配置"""
     return handle_delete_logic_rule()
+
+@bp.route('/api/validate-detection', methods=['POST'])
+def validate_detection():
+    """验证检测结果"""
+    return handle_validate_detection()
 
 @socketio.on('connect')
 def handle_connect():

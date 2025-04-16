@@ -17,7 +17,8 @@ function initDetectionUI() {
         // 重置检测按钮状态
         showLoading('#detectBtn', false);
         
-        displayResults(e.detail.results, e.detail.result_image);
+        // 显示检测结果，包括规则名称
+        displayResults(e.detail.results, e.detail.result_image, e.detail.rule_name);
         updateStatusMessage(`检测完成，共找到 ${e.detail.results.length} 个目标`, 'success');
     });
     
@@ -50,8 +51,11 @@ function initDetectionUI() {
                 showLoading('#detectBtn', true);
                 updateStatusMessage('正在执行检测...', 'info');
                 
-                // 执行检测
-                window.DetectionCore.detect(imagePath);
+                // 获取选择的规则名称（如果有）
+                const selectedRuleName = document.getElementById('logicRuleSelect')?.value;
+                
+                // 执行检测，传递规则名称
+                window.DetectionCore.detect(imagePath, selectedRuleName || null);
             }
         });
     }
@@ -93,8 +97,9 @@ function updateStatusMessage(message, type = 'info') {
  * 显示检测结果
  * @param {Array} results - 检测结果数组
  * @param {string} resultImageUrl - 结果图像URL
+ * @param {string} ruleName - 使用的规则名称（可选）
  */
-function displayResults(results, resultImageUrl) {
+function displayResults(results, resultImageUrl, ruleName) {
     // 显示结果图像
     const resultImage = document.getElementById('resultImage');
     if (resultImage) {
@@ -123,8 +128,17 @@ function displayResults(results, resultImageUrl) {
                 resultItem.className = 'list-group-item d-flex justify-content-between align-items-center';
                 
                 const confidencePercent = (item.score * 100).toFixed(2);
+                
+                // 创建结果内容，添加ROI区域信息（如果有）
+                let resultContent = `<span>${index + 1}. ${item.class_name}</span>`;
+                if (item.roi_id !== null && item.roi_id !== undefined) {
+                    // 使ROI编号从1开始显示
+                    const roiDisplayId = item.roi_id + 1;
+                    resultContent = `<span>${index + 1}. ${item.class_name} (ROI ${roiDisplayId})</span>`;
+                }
+                
                 resultItem.innerHTML = `
-                    <span>${index + 1}. ${item.class_name}</span>
+                    ${resultContent}
                     <span class="badge bg-primary rounded-pill">${confidencePercent}%</span>
                 `;
                 
@@ -134,6 +148,14 @@ function displayResults(results, resultImageUrl) {
         
         // 显示结果区域
         detectionResults.style.display = 'block';
+        
+        // 如果使用了规则，在结果列表头部添加规则信息
+        if (ruleName) {
+            const ruleInfoItem = document.createElement('li');
+            ruleInfoItem.className = 'list-group-item list-group-item-info';
+            ruleInfoItem.innerHTML = `<strong>使用规则:</strong> ${ruleName}`;
+            resultsList.insertBefore(ruleInfoItem, resultsList.firstChild);
+        }
     }
 }
 
@@ -143,6 +165,8 @@ function displayResults(results, resultImageUrl) {
 function clearDetectionResults() {
     const resultsList = document.getElementById('resultsList');
     const detectionResults = document.getElementById('detectionResults');
+    const resultImage = document.getElementById('resultImage');
+    const validationResult = document.getElementById('ruleValidationResult');
     
     if (resultsList) {
         resultsList.innerHTML = '';
@@ -150,6 +174,14 @@ function clearDetectionResults() {
     
     if (detectionResults) {
         detectionResults.style.display = 'none';
+    }
+    
+    if (resultImage) {
+        resultImage.style.display = 'none';
+    }
+    
+    if (validationResult) {
+        validationResult.style.display = 'none';
     }
 }
 

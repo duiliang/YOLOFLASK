@@ -58,14 +58,18 @@ def handle_detect(data):
         检测结果或错误信息
     """
     image_path = data.get('image_path', '')
+    selected_rule_name = data.get('rule_name', None)  # 获取选中的规则名称
     
-    success, results, result_url = detect_objects(image_path)
+    # 将规则名称传递给检测服务
+    success, results, result_url = detect_objects(image_path, selected_rule_name)
     
     if success:
+        # 添加规则名称到结果中，以便前端知道使用了哪个规则
         return {
             'success': True,
             'results': results,
-            'result_image': result_url
+            'result_image': result_url,
+            'rule_name': selected_rule_name
         }
     else:
         return {'error': results}

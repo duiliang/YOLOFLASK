@@ -138,6 +138,8 @@ class YOLODetector:
         # 在图像上绘制检测结果
         result_image = self.visualizer.draw_detections(image.copy(), boxes, scores, class_ids)
         
+        print(f"检测完成,输出图片大小为{result_image.shape}")
+        
         return boxes, scores, class_ids, result_image
     
     def get_class_name(self, class_id):

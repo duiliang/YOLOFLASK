@@ -3,7 +3,7 @@
 处理与逻辑规则相关的路由请求
 """
 from flask import request, jsonify, current_app
-from app.services.logic_service import get_logic_rules, save_logic_rule, delete_logic_rule
+from app.services.logic_service import get_logic_rules, save_logic_rule, delete_logic_rule, validate_detection_results
 
 def handle_get_logic_rules():
     """
@@ -128,4 +128,49 @@ def handle_delete_logic_rule():
         return jsonify({
             'success': False,
             'message': f"删除逻辑规则配置失败: {str(e)}"
+        }), 500
+
+def handle_validate_detection():
+    """
+    处理验证检测结果的请求
+    
+    Returns:
+        JSON响应: 验证结果
+    """
+    try:
+        # 获取规则名称和检测结果
+        rule_name = request.args.get('rule_name')
+        detection_data = request.json
+        
+        if not rule_name:
+            return jsonify({
+                'success': False,
+                'message': "规则名称不能为空"
+            }), 400
+            
+        # 检查数据是否有效（支持直接的数组或包含detections的对象）
+        if not detection_data:
+            return jsonify({
+                'success': False,
+                'message': "检测结果数据无效"
+            }), 400
+            
+        # 如果数据是数组，直接使用；如果是包含detections的对象，则获取其detections属性
+        detections = detection_data
+        if isinstance(detection_data, dict) and 'detections' in detection_data:
+            detections = detection_data['detections']
+            
+        # 验证检测结果
+        success, message = validate_detection_results(detections, rule_name)
+        
+        # 返回验证结果
+        return jsonify({
+            'success': success,
+            'message': message
+        })
+    except Exception as e:
+        current_app.logger.error(f"验证检测结果失败: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f"验证失败: {str(e)}"
         }), 500
