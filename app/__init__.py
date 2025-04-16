@@ -4,9 +4,10 @@ from flask_bootstrap import Bootstrap5
 import os
 import json
 import sys
+from flask import send_from_directory
 
 # 创建socketio实例，用于WebSocket通信
-socketio = SocketIO()
+socketio = SocketIO(async_mode='threading')
 bootstrap = Bootstrap5()
 
 def get_root_dir():
@@ -34,7 +35,13 @@ def create_app(test_config=None):
     Returns:
         配置好的Flask应用实例
     """
-    # 创建应用实例
+    # 导入路径工具模块
+    from app.utils.path_utils import get_upload_dir, get_results_dir, get_logs_dir, get_config_path, setup_resource_directories, get_resource_path
+    
+    # 初始化资源目录结构
+    resource_dir = setup_resource_directories()
+    
+    # 创建应用实例 - 恢复原始静态文件夹设置
     app = Flask(__name__, 
                 instance_relative_config=True,
                 template_folder='../templates',
@@ -45,24 +52,49 @@ def create_app(test_config=None):
     app.config['ROOT_DIR'] = root_dir
     
     # 初始化日志系统
+    log_dir = get_logs_dir()  # 使用新的日志目录
     from app.yolomodel.logger import ensure_log_dir, get_logger
-    log_dir = ensure_log_dir()
+    ensure_log_dir(log_dir)   # 确保日志目录存在
     app_logger = get_logger("APP", "info")
+    
     app_logger.info(f"应用启动，根目录: {root_dir}")
+    app_logger.info(f"资源目录: {resource_dir}")
     app_logger.info(f"日志目录: {log_dir}")
+    
+    # 如果是打包环境，添加额外的静态文件访问规则
+    if getattr(sys, 'frozen', False):
+        from flask import send_from_directory
+        
+        # 获取外部静态资源目录
+        external_static = os.path.join(get_resource_path(), 'static')
+        app_logger.info(f"外部静态资源目录: {external_static}")
+        
+        # 注册自定义的上传文件路由
+        @app.route('/static/uploads/<path:filename>')
+        def serve_upload(filename):
+            uploads_dir = os.path.join(external_static, 'uploads')
+            app_logger.info(f"访问外部上传文件: {filename}, 路径: {uploads_dir}")
+            return send_from_directory(uploads_dir, filename)
+        
+        # 注册自定义的结果文件路由
+        @app.route('/static/results/<path:filename>')
+        def serve_result(filename):
+            results_dir = os.path.join(external_static, 'results')
+            app_logger.info(f"访问外部结果文件: {filename}, 路径: {results_dir}")
+            return send_from_directory(results_dir, filename)
     
     # 配置应用
     app.config.from_mapping(
         SECRET_KEY='dev',
-        UPLOAD_FOLDER=os.path.join(root_dir, 'static/uploads'),#TODO 打包进行更改输出路径
-        RESULT_FOLDER=os.path.join(root_dir, 'static/results'),#TODO 打包进行更改输出路径
+        UPLOAD_FOLDER=get_upload_dir(),  # 使用外部资源目录
+        RESULT_FOLDER=get_results_dir(),  # 使用外部资源目录
         MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # 16MB上传限制
         ALLOWED_EXTENSIONS={'png', 'jpg', 'jpeg'},
     )
 
     if test_config is None:
         # 如果不是测试，则尝试加载config.json
-        config_path = os.path.join(root_dir, 'config.json')
+        config_path = get_config_path()  # 使用path_utils获取配置文件路径
         if os.path.exists(config_path):
             try:
                 with open(config_path, 'r', encoding='utf-8') as f:
@@ -111,7 +143,7 @@ def create_app(test_config=None):
     
     # 初始化扩展
     bootstrap.init_app(app)
-    socketio.init_app(app, cors_allowed_origins="*")
+    socketio.init_app(app, cors_allowed_origins="*", async_mode='threading')
     app_logger.info("初始化Flask扩展完成")
     
     # 注册蓝图

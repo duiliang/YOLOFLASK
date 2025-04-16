@@ -6,8 +6,8 @@
     <title>{% block title %}YOLO目标检测系统{% endblock %}</title>
     <!-- Bootstrap CSS -->
     {{ bootstrap.load_css() }}
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Bootstrap Icons - 本地版本 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}">
     <!-- 自定义CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block extra_css %}{% endblock %}
@@ -104,13 +104,8 @@
 
     <!-- Bootstrap JS 和依赖 -->
     {{ bootstrap.load_js() }}
-    <!-- Socket.IO 客户端库 - 先尝试使用CDN，如果失败会自动切换到本地版本 -->
-    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js" onerror="
-        console.warn('CDN Socket.IO库加载失败，将尝试使用本地版本');
-        var scriptElement = document.createElement('script');
-        scriptElement.src = '{{ url_for('static', filename='js/socket.io.min.js') }}';
-        document.head.appendChild(scriptElement);
-    "></script>
+    <!-- Socket.IO 客户端库 - 使用本地版本 -->
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
     <!-- 自定义JS -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block extra_js %}{% endblock %}

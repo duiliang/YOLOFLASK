@@ -33,16 +33,21 @@ def get_application_path():
         # 正常运行的情况
         return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-def ensure_log_dir():
+def ensure_log_dir(log_dir=None):
     """
     确保日志目录存在
-    在应用程序目录下创建logger文件夹
+    
+    Args:
+        log_dir: 自定义日志目录路径，如果为None则创建默认路径
     
     Returns:
         日志目录的绝对路径
     """
-    app_path = get_application_path()
-    log_dir = os.path.join(app_path, 'logger')
+    if log_dir is None:
+        # 使用默认路径
+        app_path = get_application_path()
+        log_dir = os.path.join(app_path, 'logger')
+    
     try:
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
@@ -59,7 +64,7 @@ def ensure_log_dir():
 class Logger:
     """日志记录器类，提供统一的日志记录功能"""
     
-    def __init__(self, name="YOLO", level="info", log_file=None):
+    def __init__(self, name="YOLO", level="info", log_file=None, log_dir=None):
         """
         初始化日志记录器
         
@@ -67,6 +72,7 @@ class Logger:
             name: 日志名称，默认为"YOLO"
             level: 日志级别，可选值为debug, info, warning, error, critical
             log_file: 日志文件路径，如果为None则自动创建
+            log_dir: 日志目录路径，如果为None则使用默认路径
         """
         self.logger = logging.getLogger(name)
         self.logger.setLevel(LOG_LEVELS.get(level.lower(), logging.INFO))
@@ -89,7 +95,7 @@ class Logger:
         try:
             # 如果没有指定日志文件，则创建默认日志文件
             if not log_file:
-                log_dir = ensure_log_dir()
+                log_dir = ensure_log_dir(log_dir)
                 date_str = datetime.now().strftime('%Y-%m-%d')
                 log_file = os.path.join(log_dir, f"{name}_{date_str}.log")
             
@@ -133,7 +139,7 @@ class Logger:
 # 日志记录器缓存
 _loggers = {}
 
-def get_logger(name="YOLO", level="info", log_file=None):
+def get_logger(name="YOLO", level="info", log_file=None, log_dir=None):
     """
     获取或创建日志记录器
     
@@ -141,6 +147,7 @@ def get_logger(name="YOLO", level="info", log_file=None):
         name: 日志名称
         level: 日志级别
         log_file: 日志文件路径，如果为None则自动创建
+        log_dir: 日志目录路径，如果为None则使用默认路径
     
     Returns:
         Logger实例
@@ -151,7 +158,7 @@ def get_logger(name="YOLO", level="info", log_file=None):
         return _loggers[name]
     
     # 否则创建新的日志记录器
-    logger = Logger(name, level, log_file)
+    logger = Logger(name, level, log_file, log_dir)
     _loggers[name] = logger
     return logger
 
