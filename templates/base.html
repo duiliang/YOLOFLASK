@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}YOLO目标检测系统{% endblock %}</title>
-    <!-- Bootstrap CSS -->
-    {{ bootstrap.load_css() }}
+    <!-- Bootstrap CSS - 本地版本 -->
+    <!--{{bootstrap.load_css()}} -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap.min.css') }}">
     <!-- Bootstrap Icons - 本地版本 -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}">
     <!-- 自定义CSS -->
@@ -102,10 +103,15 @@
         </div>
     </footer>
 
-    <!-- Bootstrap JS 和依赖 -->
-    {{ bootstrap.load_js() }}
-    <!-- Socket.IO 客户端库 - 使用本地版本 -->
-    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+    <!--{{bootstrap.load_js()}}-->
+    <!-- jQuery本地版本 -->
+    <script src="{{ url_for('static', filename='js/thridPart/bootstrap/jquery.min.js') }}"></script>
+    <!-- Popper.js本地版本 -->
+    <script src="{{ url_for('static', filename='js/thridPart/bootstrap/popper.min.js') }}"></script> 
+    <!-- Bootstrap JS本地版本 -->
+    <script src="{{ url_for('static', filename='js/thridPart/bootstrap/bootstrap.min.js') }}"></script> 
+    <!-- Socket.IO 客户端库 - 本地版本 -->
+    <script src="{{ url_for('static', filename='js/thridPart/socket.io.min.js') }}"></script>
     <!-- 自定义JS -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block extra_js %}{% endblock %}

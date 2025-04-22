@@ -122,28 +122,83 @@ FlaskYolo/
 
 ## 打包说明
 
-使用PyInstaller打包成独立可执行程序：
+本项目提供了专门的打包脚本，可将应用打包成完全离线运行的独立可执行程序：
 
-```
-# 基本打包命令
-pyinstaller --onefile --add-data "templates;templates" --add-data "static;static" --add-data "config.json;." app.py
+```bash
+# 使用内置打包脚本（推荐）
+python build_exe.py
 
-# 或者使用更详细的配置
-pyinstaller --name="YOLO检测器" ^
+# 或手动使用PyInstaller
+pyinstaller --name="YOLO目标检测系统" ^
             --onefile ^
-            --windowed ^
-            --icon=static/favicon.ico ^
+            --console ^
+            --icon=static/img/favicon.ico ^
             --add-data "templates;templates" ^
             --add-data "static;static" ^
             --add-data "config.json;." ^
-            app.py
+            --hidden-import=eventlet.hubs.epolls ^
+            --hidden-import=eventlet.hubs.kqueue ^
+            --hidden-import=eventlet.hubs.selects ^
+            --hidden-import=engineio.async_drivers.threading ^
+            --hidden-import=gevent ^
+            --hidden-import=gevent.ssl ^
+            --hidden-import=gevent.builtins ^
+            --hidden-import=socketio ^
+            --hidden-import=engineio ^
+            launcher.py
 ```
 
-注意事项：
-1. 确保打包前已安装所有依赖
-2. 打包后的可执行文件会生成在`dist`目录下
-3. 首次运行可能会比较慢，属于正常现象
-4. 应用会自动创建必要的目录结构
+### 离线打包特性
+
+本系统支持完全离线部署和运行，主要特性包括：
+
+1. **所有依赖本地化**：
+   - Bootstrap、jQuery、Popper.js等前端库已本地化
+   - Socket.IO客户端库已本地化
+   - 无需互联网连接即可运行
+
+2. **资源目录结构**：
+   打包后的文件结构为：
+   ```
+   dist/
+   ├── YOLO目标检测系统.exe       # 主程序
+   ├── config.json               # 主配置文件(根目录)
+   ├── README.txt                # 使用说明
+   └── resources/                # 资源目录
+       ├── config/               # 配置文件备份
+       ├── models/               # 模型文件
+       ├── logs/                 # 日志文件
+       └── static/               # 静态资源
+           ├── uploads/          # 上传图片
+           └── results/          # 检测结果
+   ```
+
+3. **自动资源管理**：
+   - 程序会自动创建必要的资源目录
+   - 上传的图片和处理结果保存在外部资源目录
+   - 配置文件支持外部修改，重启程序后生效
+
+### 部署与使用说明
+
+1. 将整个`dist`文件夹复制到目标计算机上
+2. 双击`YOLO目标检测系统.exe`启动应用
+3. 在浏览器中访问`http://localhost:5000`使用系统
+4. 模型文件位于`resources/models`目录，可以直接更换
+5. 系统日志保存在`resources/logs`目录，便于排查问题
+
+### 打包常见问题
+
+1. **WebSocket连接失败**：
+   - 确保打包时包含了所有必要的隐藏导入
+   - 检查防火墙设置是否阻止了WebSocket连接
+
+2. **静态资源加载失败**：
+   - 确保`static`目录下的资源已正确打包
+   - 检查资源文件路径是否正确
+
+3. **配置文件加载失败**：
+   - 确保`config.json`文件位于主程序同级目录
+   - 检查配置文件格式是否正确
 
 ## 配置文件说明
 

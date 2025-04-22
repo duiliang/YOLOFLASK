@@ -251,7 +251,7 @@ function checkSocketIOLibrary() {
         
         // 创建script元素
         const script = document.createElement('script');
-        script.src = '/static/js/socket.io.min.js';
+        script.src = '/static/js/thridPart/socket.io.min.js';
         script.async = true;
         script.onload = function() {
             console.log('本地Socket.IO库加载成功');
